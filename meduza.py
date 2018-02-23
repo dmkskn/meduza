@@ -186,6 +186,6 @@ def is_today(article):
 
     Return True if the article was published today, otherwise 
     return False."""
-    t = _localtime(article_dict['published_at'])
+    t = _localtime(article['published_at'])
     article_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
     return article_date == _date.today()
