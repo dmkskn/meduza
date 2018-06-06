@@ -62,10 +62,12 @@ _eng_section_from = {
 # open URL and return JSON response (as dict)
 def _urlopenjson(url):
     # open url
-    data = _urlopen(url).read()
+    response = _urlopen(url)
+    headers = dict(response.headers)
+    data = response.read()
     # if the data is compressed using gzip, then decompress this.
     # (u is a gzip file if the first two bytes are '0x1f' and '0x8b')
-    if data.startswith(b'\x1f\x8b'):
+    if headers.get('Content-Encoding') == 'gzip':
         data = _gzip.decompress(data)
     # remove all non-breaking spaces
     data = data.decode('utf-8').replace('\xa0', ' ')
