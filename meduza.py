@@ -1,16 +1,12 @@
-"""
-A simple Python module that wraps the meduza.io API.
-
-"""
+"""A simple Python module that wraps the meduza.io API."""
 
 import json as _json
 import gzip as _gzip
-from datetime.date import date as _date
+from datetime import date as _date
 from urllib.parse import urljoin as _urljoin
 from urllib.parse import urlencode as _urlencode
 from urllib.request import urlopen as _urlopen
 from itertools import islice as _islice
-
 
 
 __all__ = ['LANGUAGES', 'EN_SECTIONS', 'RU_SECTIONS', 'EN_TAGS', 'RU_TAGS',
@@ -74,10 +70,8 @@ def _urlopenjson(url):
     return _json.loads(data)
 
 
-def stocks(key=None):
-    """Get stocks
-
-    Return a dict object."""
+def stocks(key=None) -> dict:
+    """Returns stocks."""
     response = _urlopenjson(_STOCK_API)
     if key is None:
         return response
@@ -85,12 +79,10 @@ def stocks(key=None):
         return response[key]
 
 
-def get(url):
-    """Get the article for a given page URL.
+def get(url: str) -> dict:
+    """Gets the article for the url.
 
-    url -- URL of a page.
-
-    Return a dict object."""
+    `url` - the url of a page."""
     if not url.startswith(_BASEURL):
         url = _urljoin(_BASEURL, url)
     if _API_SUFFIX not in url:
@@ -98,16 +90,14 @@ def get(url):
     return _urlopenjson(url)['root']
 
 
-def section(section, results=24, language='ru'):
-    """Get articles from a given section.
+def section(section: str, results=24, language='ru'):
+    """Gets articles from the `section`.
 
-    section  -- Section name (see meduza.EN_SECTIONS and 
-                meduza.RU_SECTIONS constants);
-    results  -- How many articles to return;
-    language -- Russian or English version of meduza.io (see 
-                meduza.LANGUAGES).
-
-    Return a generator object."""
+    `section` - Section name (see `meduza.EN_SECTIONS` and q
+    `meduza.RU_SECTIONS` constants);
+    `results` - How many articles to return;
+    `language` - Russian or English version of meduza.io (see 
+    `meduza.LANGUAGES`)."""
     page = 0
     while results and page <= 10: # (more pages are not available)
         payload = {
@@ -127,15 +117,13 @@ def section(section, results=24, language='ru'):
 
 
 def tag(tag, results=24, language='ru'):
-    """Get articles with a given tag.
+    """Gets articles with the `tag`.
 
-    tag      -- Article tag. Same as in article['tag']['name'] (see
-                meduza.EN_TAGS and meduza.RU_TAGS constants);
-    results  -- How many articles to return;
-    language -- Russian or English version of meduza.io (see 
-                meduza.LANGUAGES).
-
-    Return a generator object."""
+    `tag` - An article tag. Same as in `article['tag']['name']` (see
+    `meduza.EN_TAG`S and `meduza.RU_TAGS` constants);
+    `results`  -- How many articles to return;
+    `language` -- Russian or English version of meduza.io (see 
+    `meduza.LANGUAGES`)."""
     # choose a section 
     if language == 'ru':
         section_ = _rus_section_from[tag]
@@ -150,20 +138,15 @@ def tag(tag, results=24, language='ru'):
     yield from _islice(filter(valid_tag, section_generator), results)
 
 
-def reactions_for(article):
-    """Get number of reactions in social networks (and number of 
-    comments on meduza.io) for an article.
-
-    Return a dict object like 
-    {'vk': 0, 'fb': 0, 'ok': 0, 'reactions': 0}."""
+def reactions_for(article) -> dict:
+    """Gets number of reactions in social networks (and number of 
+    comments on meduza.io) for the `article`."""
     return list(iter_reactions_for(article))[0]
 
 
 def iter_reactions_for(*articles):
-    """Get number of reactions in social networks (and number of 
-    comments on meduza.io) for all articles.
-
-    Return a generator object."""
+    """Gets number of reactions in social networks (and number of 
+    comments on meduza.io) for all articles."""
     urls = [a['url'] for a in articles]
     url = _SOCIAL_API + _urlencode({'links':_json.dumps([*urls])})
     dirty_dict = _urlopenjson(url)
@@ -171,20 +154,14 @@ def iter_reactions_for(*articles):
     return result
 
 
-def latest_push():
-    """Get the latest push.
-
-    Return a dict object with three keys like 
-    {'url': '...', 'title': '...', 'body': '...'}."""
+def latest_push() -> dict:
+    """Gets the latest push."""
     push = _urlopenjson(_LATEST_PUSH)['notification']
     return {'title': push['title'], 'body': push['body'], 'url': push['url']}
 
 
-def is_today(article):
-    """Defines whether the article is published today.
+def is_today(article: dict) -> bool:
+    """Defines whether the `article` is published today.
 
-    article -- an article dict.
-
-    Return True if the article was published today, otherwise 
-    return False."""
+    `article` - an article dict."""
     return _date.today() == _date.fromtimestamp(article['published_at'])

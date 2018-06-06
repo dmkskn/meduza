@@ -3,3 +3,4 @@
 meduza.egg-info
 dist/
 todo.md
+venv/
