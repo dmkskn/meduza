@@ -3,6 +3,7 @@
 import json as _json
 import gzip as _gzip
 from datetime import date as _date
+from datetime import datetime as _datetime
 from urllib.parse import urljoin as _urljoin
 from urllib.parse import urlencode as _urlencode
 from urllib.request import urlopen as _urlopen
@@ -165,3 +166,43 @@ def is_today(article: dict) -> bool:
 
     `article` - an article dict."""
     return _date.today() == _date.fromtimestamp(article['published_at'])
+
+
+
+class Article: # BETA
+    def __init__(self, info: dict):
+        self._info = info
+        self.url = _BASEURL + info['url']
+        self.title = info['title']
+        self.second_title = info.get('second_title')
+        self.description = info['description']
+        self.is_blocks = bool(info['content'].get('blocks'))
+        self.datetime = _datetime.fromtimestamp(info['published_at'])
+        self.source = info['source']
+        self.reactions = reactions_for(info)
+        self.tag = info['tag']['name']
+        self.type = info['document_type']
+        if info.get('image'):
+            self.image = {
+                'url': _BASEURL + info['image'].get('large_url') or \
+                info['image'].get('small_url'),
+                'caption': info['image']['caption'],
+                'credit': info['image']['credit']
+                }
+        else:
+            self.image = None
+        if self.is_blocks:
+            self.content = info['content']['blocks']
+        else:
+            self.content = info['content']['body']
+    
+    def __repr__(self):
+        return f"<{self.tag.title()}: '{self.title}'>"
+    
+    def __iter__(self):
+        iters = dict((x,y) for x,y in self.__dict__.items() if not x.startswith('_'))
+        for x, y in iters.items():
+            yield x, y
+    
+    def as_dict(self):
+        return self._info
