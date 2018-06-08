@@ -176,25 +176,40 @@ class Article: # BETA
         self.title = info['title']
         self.second_title = info.get('second_title')
         self.description = info['description']
-        self.is_blocks = bool(info['content'].get('blocks'))
-        self.datetime = _datetime.fromtimestamp(info['published_at'])
         self.source = info['source']
         self.reactions = reactions_for(info)
         self.tag = info['tag']['name']
         self.type = info['document_type']
+        self.footer = info['footer']
+        self.is_blocks = bool(info['content'].get('blocks') or info['content'].get('slides'))
+        self.is_html = bool(info['content'].get('body'))
+        self.image = self._get_image(info)
+        self.blocks, \
+        self.html = self._get_content(info)
+        self.datetime = {
+            'modification': _datetime.fromtimestamp(info['modified_at']),
+            'publication': _datetime.fromtimestamp(info['published_at']),
+        } 
+        
+    def _get_image(self, info):
         if info.get('image'):
-            self.image = {
+            return {
                 'url': _BASEURL + info['image'].get('large_url') or \
                 info['image'].get('small_url'),
                 'caption': info['image']['caption'],
                 'credit': info['image']['credit']
                 }
         else:
-            self.image = None
+            return None
+    
+    def _get_content(self, info):
+        blocks = None
+        html = None
         if self.is_blocks:
-            self.content = info['content']['blocks']
-        else:
-            self.content = info['content']['body']
+            blocks = info['content'].get('blocks') or info['content'].get('slides')
+        if self.is_html:
+            html = info['content']['body']
+        return (html, blocks)
     
     def __repr__(self):
         return f"<{self.tag.title()}: '{self.title}'>"
