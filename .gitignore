@@ -1,6 +1,11 @@
 .DS_Store
+.vscode
+
 *.pyc
-meduza.egg-info
+*.egg-info
+
+!README.md
+*.md
+
 dist/
-todo.md
 venv/
