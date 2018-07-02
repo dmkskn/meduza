@@ -148,7 +148,7 @@ def reactions_for(article) -> dict:
 def iter_reactions_for(*articles):
     """Gets number of reactions in social networks (and number of 
     comments on meduza.io) for all articles."""
-    urls = [a['url'] for a in articles]
+    urls = (a['url'] for a in articles)
     url = _SOCIAL_API + _urlencode({'links':_json.dumps([*urls])})
     dirty_dict = _urlopenjson(url)
     result = (dirty_dict[url]['stats'] for url in dirty_dict)
