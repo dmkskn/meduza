@@ -181,11 +181,11 @@ class Article: # BETA
         self.tag = info['tag']['name']
         self.type = info['document_type']
         self.footer = info['footer']
-        self.is_blocks = bool(info['content'].get('blocks') or info['content'].get('slides'))
-        self.is_html = bool(info['content'].get('body'))
+        self.is_blocks = 'blocks' in info['content'] or 'slides' in info['content']
+        self.is_html = 'body' in info['content']
         self.image = self._get_image(info)
-        self.blocks, \
-        self.html = self._get_content(info)
+        self.blocks = self._get_blocks_or_none(info)
+        self.html = self._get_html_or_none(info)
         self.datetime = {
             'modification': _datetime.fromtimestamp(info['modified_at']),
             'publication': _datetime.fromtimestamp(info['published_at']),
@@ -202,15 +202,18 @@ class Article: # BETA
         else:
             return None
     
-    def _get_content(self, info):
-        blocks = None
-        html = None
+    def _get_blocks_or_none(self, info):
         if self.is_blocks:
-            blocks = info['content'].get('blocks') or info['content'].get('slides')
-        if self.is_html:
-            html = info['content']['body']
-        return (html, blocks)
+            return info['content'].get('blocks') or info['content'].get('slides')
+        else:
+            return None
     
+    def _get_html_or_none(self, info):
+        if self.is_html:
+            return info['content']['body']
+        else:
+            return None
+
     def __repr__(self):
         return f"<{self.tag.title()}: '{self.title}'>"
     
