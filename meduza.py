@@ -139,10 +139,10 @@ def tag(tag, results=24, language='ru'):
     yield from _islice(filter(valid_tag, section_generator), results)
 
 
-def reactions_for(article) -> dict:
+def reactions_for(article: dict) -> dict:
     """Gets number of reactions in social networks (and number of 
     comments on meduza.io) for the `article`."""
-    return list(iter_reactions_for(article))[0]
+    return next(iter_reactions_for(article))
 
 
 def iter_reactions_for(*articles):
