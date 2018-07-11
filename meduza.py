@@ -24,7 +24,7 @@ RU_SECTIONS = ("news", "articles", "shapito", "razbor", "games", "podcasts")
 
 EN_TAGS = ("news", "like it or not", "games")
 
-RU_TAGS = ("новости", "истории", "разбор", "шапито", "игры", "подкасты"
+RU_TAGS = ("новости", "истории", "разбор", "шапито", "игры", "подкасты",
            "партнерский материал")
 
 
@@ -80,7 +80,7 @@ def stocks(key=None) -> dict:
         return response[key]
 
 
-def get(url: str) -> dict:
+def get(url: str, as_dict=False) -> dict:
     """Gets the article for the url.
 
     `url` - the url of a page."""
@@ -88,10 +88,11 @@ def get(url: str) -> dict:
         url = _urljoin(_BASEURL, url)
     if _API_SUFFIX not in url:
         url = url.replace(_BASEURL, f'{_BASEURL}/{_API_SUFFIX}')
-    return _urlopenjson(url)['root']
+    json_as_dict = _urlopenjson(url)['root']
+    return json_as_dict if as_dict else Article(json_as_dict)
 
 
-def section(section: str, results=24, language='ru'):
+def section(section: str, results=24, language='ru', as_dict=False):
     """Gets articles from the `section`.
 
     `section` - Section name (see `meduza.EN_SECTIONS` and q
@@ -110,14 +111,14 @@ def section(section: str, results=24, language='ru'):
         url = _SEARCH_API + _urlencode(payload)
         for full_dict_url in _urlopenjson(url)['documents'].keys():
             if results:
-                yield get(full_dict_url)
+                yield get(full_dict_url, as_dict=as_dict)
                 results -= 1
             else:
                 break
         page += 1
 
 
-def tag(tag, results=24, language='ru'):
+def tag(tag, results=24, language='ru', as_dict=False):
     """Gets articles with the `tag`.
 
     `tag` - An article tag. Same as in `article['tag']['name']` (see
@@ -134,7 +135,7 @@ def tag(tag, results=24, language='ru'):
     valid_tag = lambda a: a['tag']['name'] == tag
     # generator of the current section `section_`
     # `results=24*10` because probably this is the maximum value
-    section_generator = section(section_, 24 * 10, language)
+    section_generator = section(section_, 24 * 10, language, as_dict=as_dict)
     # a slice of filtered by tag articles
     yield from _islice(filter(valid_tag, section_generator), results)
 
