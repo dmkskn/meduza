@@ -3,6 +3,7 @@
 A simple Python module that wraps the [meduza.io](https://meduza.io) API. (read about Meduza on [Buzzfeed](https://www.buzzfeed.com/bensmith/russians-try-to-build-a-normal-media-startup-across-the-bord))
 
 ## Installation
+
 ```
 pip3 install meduza
 ```
@@ -11,7 +12,7 @@ pip3 install meduza
 
 Get an article:
 
-```
+```python
 >>> url = "https://meduza.io/en/brief/2018/07/16/the-real-russia-today"
 
 >>> article = meduza.get(url)
@@ -48,7 +49,7 @@ article.url
 
 Read latest articles:
 
-```
+```python
 # English version:
 
 >>> for article in meduza.section('news', language='en', results=3):
@@ -70,7 +71,7 @@ Read latest articles:
 
 You can find available tags and sections in constants:
 
-```
+```python
 >>> meduza.EN_SECTIONS
 'news'
 
