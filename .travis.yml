@@ -1,0 +1,10 @@
+language: python
+python:
+- "3.6"
+script: python -m unittest discover -s tests/
+deploy:
+  skip_cleanup: true
+  provider: pypi
+  user: dmkskn
+  password: 
+    secure: SjNJxwbs8ahhj9gD3JsPEL6wTV/asg4GeCQufyUho4KVqUpcdQ4B60ksrnkLo7MNpKoELNlCYuVKEZU1hgluLuTzQO61OdxX0y7Z/Kl28Bzqg4d6BuSW38q+d6ubmNr+UbI8xvoewNrNQX+5Rx27Z8sA9BMZiOwajBZiySsxRPe08sLO1fhrefoUH2CPgY8oWN6/op+xnKLPS1PHaY7fvQVXKkruCduYNFRqMOsP18FR0ZCoHrF30TXnSCaE+2mpuwIlDwoWmJSK+0uQtsgae/YQguP7oEouck0DHHi9ITRK8My5B+PmdBSb/SsdDCI2JTdns+TuYYkrVnoKGXZsUYxMueOxX7dqUB8b43PfeATjtXC03gmTOeHzbn26iDaUrCkBq8AxD8ROph6zsJJZImlyS3JLrcnI4EMEgS7AqP3MVnGR3yCv7jP4G/1tKkvKYIH2x7cboiKJIofwHYiWcK6KA8Gbkv9IzzeNL6ljlBH2/Csm4gjOX77Fkd7g3XCKxuGHXo9WuSiP98xu56K/6YG5zyxs9K0U+ffLfJ21HzlA53rtFswqEKbYjMvp6VdqnTcGLpnG9NLC3d/03/Hh+042LbgseUkLmCm5r1OpGJBug8XLcdxYfZjIbUo40NAzqi8LSdPquFN9eZWylypkiIxKs2D2Y8vVtS/Ql24pbx0=
