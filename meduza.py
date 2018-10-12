@@ -214,7 +214,7 @@ class Article:  # BETA
         self.reactions = reactions_for(info)
         self.tag = info["tag"]["name"]
         self.type = info["document_type"]
-        self.footer = info["footer"]
+        self.footer = info.get("footer")
         self.is_blocks = "blocks" in info["content"] or "slides" in info["content"]
         self.is_html = "body" in info["content"]
         self.image = self._get_image(info)
