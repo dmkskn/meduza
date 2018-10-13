@@ -114,7 +114,7 @@ def stocks(key=None) -> dict:
         return response[key]
 
 
-def get(url: str, as_dict=False) -> dict:
+def get(url: str, *, as_dict=False) -> dict:
     """Gets the article for the url.
 
     `url` - the url of a page."""
@@ -126,52 +126,52 @@ def get(url: str, as_dict=False) -> dict:
     return json_as_dict if as_dict else Article(json_as_dict)
 
 
-def section(section: str, results=24, language="ru", as_dict=False):
+def section(section: str, *, n=24, lang="ru", as_dict=False):
     """Gets articles from the `section`.
 
     `section` - Section name (see `meduza.EN_SECTIONS` and q
     `meduza.RU_SECTIONS` constants);
-    `results` - How many articles to return;
-    `language` - Russian or English version of meduza.io (see 
+    `n` - How many articles to return;
+    `lang` - Russian or English version of meduza.io (see 
     `meduza.LANGUAGES`)."""
     page = 0
-    while results and page <= 10:  # (more pages are not available)
+    while n and page <= 10:  # (more pages are not available)
         payload = {
             "chrono": section,
-            "locale": language,
+            "locale": lang,
             "page": page,
             "per_page": "24",
         }
         url = _SEARCH_API + _urlencode(payload)
         for full_dict_url in _urlopenjson(url)["documents"].keys():
-            if results:
+            if n:
                 yield get(full_dict_url, as_dict=as_dict)
-                results -= 1
+                n -= 1
             else:
                 break
         page += 1
 
 
-def tag(tag, results=24, language="ru", as_dict=False):
+def tag(tag, *, n=24, lang="ru", as_dict=False):
     """Gets articles with the `tag`.
 
     `tag` - An article tag. Same as in `article['tag']['name']` (see
     `meduza.EN_TAG`S and `meduza.RU_TAGS` constants);
-    `results`  -- How many articles to return;
-    `language` -- Russian or English version of meduza.io (see 
+    `n`  -- How many articles to return;
+    `lang` -- Russian or English version of meduza.io (see 
     `meduza.LANGUAGES`)."""
     # choose a section
-    if language == "ru":
+    if lang == "ru":
         section_ = _rus_section_from[tag]
     else:
         section_ = _eng_section_from[tag]
     # key function
     valid_tag = lambda a: a["tag"]["name"] == tag
     # generator of the current section `section_`
-    # `results=24*10` because probably this is the maximum value
-    section_generator = section(section_, 24 * 10, language, as_dict=as_dict)
+    # `n=24*10` because probably this is the maximum value
+    section_generator = section(section_, n=24 * 10, lang=lang, as_dict=as_dict)
     # a slice of filtered by tag articles
-    yield from _islice(filter(valid_tag, section_generator), results)
+    yield from _islice(filter(valid_tag, section_generator), n)
 
 
 def reactions_for(article: dict) -> dict:

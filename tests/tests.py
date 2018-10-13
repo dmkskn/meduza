@@ -40,14 +40,14 @@ class TestPublicAPI(unittest.TestCase):
         self.assertIsNotNone(article_created_by_url_with_api_suffix.get("title"))
 
     def test_section_function(self):
-        shapito = meduza.section(section="shapito", results=24, language="ru")
+        shapito = meduza.section("shapito", n=24, lang="ru")
         self.assertTrue(isgenerator(shapito))
 
         shapito_list = list(shapito)
         self.assertEqual(len(shapito_list), 24)
 
     def test_tag_function(self):
-        shapito = meduza.tag(tag="шапито", results=24, language="ru", as_dict=True)
+        shapito = meduza.tag("шапито", n=24, lang="ru", as_dict=True)
         self.assertTrue(isgenerator(shapito))
 
         shapito_list = list(shapito)
@@ -57,15 +57,13 @@ class TestPublicAPI(unittest.TestCase):
             self.assertEqual(a["tag"]["name"], "шапито")
 
     def test_reactions_for_function(self):
-        shapito, *_ = meduza.tag(tag="шапито", results=1, language="ru", as_dict=True)
+        shapito, *_ = meduza.tag("шапито", n=1, lang="ru", as_dict=True)
         reactions_for_shapito = meduza.reactions_for(shapito)
         self.assertIsInstance(reactions_for_shapito, dict)
         self.assertNotEqual(reactions_for_shapito, {})
 
     def test_iter_reactions_for_function(self):
-        shapito_articles = meduza.tag(
-            tag="шапито", results=3, language="ru", as_dict=True
-        )
+        shapito_articles = meduza.tag("шапито", n=3, lang="ru", as_dict=True)
         reactions = meduza.iter_reactions_for(*shapito_articles)
         self.assertTrue(isgenerator(reactions))
         for r in reactions:
@@ -75,6 +73,12 @@ class TestPublicAPI(unittest.TestCase):
         push = meduza.latest_push()
         self.assertIsInstance(push, dict)
         self.assertTrue(bool(push["url"]))
+
+    def test_section_and_tag_kwargs(self):
+        with self.assertRaises(TypeError):
+            meduza.section("news", 24)
+        with self.assertRaises(TypeError):
+            meduza.tag("новости", 24)
 
 
 class TestArticle(unittest.TestCase):
