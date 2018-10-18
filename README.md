@@ -54,7 +54,7 @@ Read latest articles:
 ```python
 # English version:
 
->>> for article in meduza.section('news', language='en', results=3):
+>>> for article in meduza.section('news', n=3, lang='en'):
 ...     print(article)
 <News: 'A good news month'>
 <Like It Or Not: 'A masterclass in imprecision'>
@@ -63,7 +63,7 @@ Read latest articles:
 
 # Russian version:
 
->>> for article in meduza.section('news', language='ru', results=3):
+>>> for article in meduza.section('news', n=3, lang='ru'):
 ...     print(article)
 <Новости: 'Путина спросили про пенсионную реформу. Он ответил, что ему все не нравится'>
 <Шапито: 'В Екатеринбурге открыли барельеф с «условными» Дзержинским и Сталиным (или Кагановичем)'>
