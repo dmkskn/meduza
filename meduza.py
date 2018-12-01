@@ -1,13 +1,12 @@
 """A simple Python module that wraps the meduza.io API."""
 
-import json as _json
-import gzip as _gzip
-from datetime import date as _date
-from datetime import datetime as _datetime
-from urllib.parse import urljoin as _urljoin
-from urllib.parse import urlencode as _urlencode
-from urllib.request import urlopen as _urlopen
-from itertools import islice as _islice
+import gzip
+import json
+from datetime import date, datetime
+from itertools import islice
+from urllib.parse import urlencode, urljoin
+from urllib.request import urlopen
+from unicodedata import normalize
 
 
 __all__ = [
@@ -21,35 +20,17 @@ __all__ = [
     "section",
     "tag",
     "reactions_for",
-    "iter_reactions_for",
     "latest_push",
-    "is_today",
 ]
 
 
-LANGUAGES = [
-    "ru", 
-    "en",
-]
+LANGUAGES = ["ru", "en"]
 
-EN_SECTIONS = [
-    "news",
-]
+EN_SECTIONS = ["news"]
 
-RU_SECTIONS = [
-    "news", 
-    "articles", 
-    "shapito", 
-    "razbor", 
-    "games", 
-    "podcasts",
-]
+RU_SECTIONS = ["news", "articles", "shapito", "razbor", "games", "podcasts"]
 
-EN_TAGS = [
-    "news", 
-    "like it or not", 
-    "games",
-]
+EN_TAGS = ["news", "like it or not", "games"]
 
 RU_TAGS = [
     "новости",
@@ -62,13 +43,14 @@ RU_TAGS = [
 ]
 
 
-
 _BASEURL = "https://meduza.io"
-_API_SUFFIX = "api/v3"
-_SEARCH_API = f"{_BASEURL}/{_API_SUFFIX}/search?"
-_SOCIAL_API = f"{_BASEURL}/{_API_SUFFIX}/social?"
-_STOCK_API = f"{_BASEURL}/{_API_SUFFIX}/stock/all"
-_LATEST_PUSH = f"{_BASEURL}/{_API_SUFFIX}/push/chrome/latest"
+_V3 = "api/v3"
+_W4 = "api/w4"
+_MISC = "api/misc"
+_SEARCH_API = f"{_BASEURL}/{_W4}/search?"
+_SOCIAL_API = f"{_BASEURL}/{_MISC}/social?"
+_STOCK_API = f"{_BASEURL}/{_MISC}/stock/all"
+_LATEST_PUSH = f"{_BASEURL}/{_V3}/push/chrome/latest"
 
 
 # maps tags to sections (russian)
@@ -83,50 +65,42 @@ _rus_section_from = {
 }
 
 # maps tags to sections (english)
-_eng_section_from = {
-    "news": "news",
-    "games": "news",
-    "like it or not": "news",
-}
+_eng_section_from = {"news": "news", "games": "news", "like it or not": "news"}
 
 
 # open URL and return JSON response (as dict)
-def _urlopenjson(url):
+def _GET(url):
     # open url
-    response = _urlopen(url)
+    response = urlopen(url)
     headers = dict(response.headers)
     data = response.read()
     # if the data is compressed using gzip, then decompress this.
     # (u is a gzip file if the first two bytes are '0x1f' and '0x8b')
     if headers.get("Content-Encoding") == "gzip":
-        data = _gzip.decompress(data)
+        data = gzip.decompress(data)
     # remove all non-breaking spaces
     data = data.decode("utf-8").replace("\xa0", " ")
-    return _json.loads(data)
+    return json.loads(data)
 
 
 def stocks(key=None) -> dict:
     """Returns stocks."""
-    response = _urlopenjson(_STOCK_API)
-    if key is None:
-        return response
-    else:
-        return response[key]
+    response = _GET(_STOCK_API)
+    return response if key is None else response[key]
 
 
-def get(url: str, *, as_dict=False) -> dict:
+def get(url: str) -> dict:
     """Gets the article for the url.
 
     `url` - the url of a page."""
     if not url.startswith(_BASEURL):
-        url = _urljoin(_BASEURL, url)
-    if _API_SUFFIX not in url:
-        url = url.replace(_BASEURL, f"{_BASEURL}/{_API_SUFFIX}")
-    json_as_dict = _urlopenjson(url)["root"]
-    return json_as_dict if as_dict else Article(json_as_dict)
+        url = urljoin(_BASEURL, url)
+    if _W4 not in url:
+        url = url.replace(_BASEURL, f"{_BASEURL}/{_W4}")
+    return _GET(url)["root"]
 
 
-def section(section: str, *, n=24, lang="ru", as_dict=False):
+def section(section: str, *, n=24, lang="ru", page=0):
     """Gets articles from the `section`.
 
     `section` - Section name (see `meduza.EN_SECTIONS` and q
@@ -134,25 +108,24 @@ def section(section: str, *, n=24, lang="ru", as_dict=False):
     `n` - How many articles to return;
     `lang` - Russian or English version of meduza.io (see 
     `meduza.LANGUAGES`)."""
-    page = 0
-    while n and page <= 10:  # (more pages are not available)
-        payload = {
-            "chrono": section,
-            "locale": lang,
-            "page": page,
-            "per_page": "24",
-        }
-        url = _SEARCH_API + _urlencode(payload)
-        for full_dict_url in _urlopenjson(url)["documents"].keys():
-            if n:
-                yield get(full_dict_url, as_dict=as_dict)
-                n -= 1
-            else:
-                break
-        page += 1
+
+    def _article_urls(url):
+        documents = _GET(url)["documents"]
+        for url in documents:
+            if url == "nil":
+                url = documents["nil"]["root"]["url"]
+            yield url
+
+    payload = {"chrono": section, "locale": lang, "page": page, "per_page": n}
+    for url in _article_urls(_SEARCH_API + urlencode(payload)):
+        yield get(url)
 
 
-def tag(tag, *, n=24, lang="ru", as_dict=False):
+def _choose_section_if_tag(tag, *, lang):
+    return _rus_section_from[tag] if lang == "ru" else _eng_section_from[tag]
+
+
+def tag(tag, *, n=24, lang="ru"):
     """Gets articles with the `tag`.
 
     `tag` - An article tag. Same as in `article['tag']['name']` (see
@@ -160,101 +133,24 @@ def tag(tag, *, n=24, lang="ru", as_dict=False):
     `n`  -- How many articles to return;
     `lang` -- Russian or English version of meduza.io (see 
     `meduza.LANGUAGES`)."""
-    # choose a section
-    if lang == "ru":
-        section_ = _rus_section_from[tag]
-    else:
-        section_ = _eng_section_from[tag]
-    # key function
-    valid_tag = lambda a: a["tag"]["name"] == tag
-    # generator of the current section `section_`
-    # `n=24*10` because probably this is the maximum value
-    section_generator = section(section_, n=24 * 10, lang=lang, as_dict=as_dict)
-    # a slice of filtered by tag articles
-    yield from _islice(filter(valid_tag, section_generator), n)
+    section_name = _choose_section_if_tag(tag, lang=lang)
+    page = 0
+    m = n
+    while m > 0:
+        for article in section(section_name, n=n, lang=lang, page=page):
+            if m > 0 and article["tag"]["name"] == tag:
+                yield article
+                m -= 1
+        page += 1
 
 
-def reactions_for(article: dict) -> dict:
+def reactions_for(*urls) -> dict:
     """Gets number of reactions in social networks (and number of 
-    comments on meduza.io) for the `article`."""
-    return next(iter_reactions_for(article))
-
-
-def iter_reactions_for(*articles):
-    """Gets number of reactions in social networks (and number of 
-    comments on meduza.io) for all articles."""
-    urls = (a["url"] for a in articles)
-    url = _SOCIAL_API + _urlencode({"links": _json.dumps([*urls])})
-    dirty_dict = _urlopenjson(url)
-    result = (dirty_dict[url]["stats"] for url in dirty_dict)
-    return result
+    comments on meduza.io) for urls."""
+    url = _SOCIAL_API + urlencode({"links": json.dumps([*urls])})
+    return _GET(url)
 
 
 def latest_push() -> dict:
     """Gets the latest push."""
-    push = _urlopenjson(_LATEST_PUSH)["notification"]
-    return {"title": push["title"], "body": push["body"], "url": push["url"]}
-
-
-def is_today(article: dict) -> bool:
-    """Defines whether the `article` is published today.
-
-    `article` - an article dict."""
-    return _date.today() == _date.fromtimestamp(article["published_at"])
-
-
-class Article:  # BETA
-    def __init__(self, info: dict):
-        self._info = info
-        self.url = _BASEURL + info["url"]
-        self.title = info["title"]
-        self.second_title = info.get("second_title")
-        self.description = info["description"]
-        self.source = info["source"]
-        self.reactions = reactions_for(info)
-        self.tag = info["tag"]["name"]
-        self.type = info["document_type"]
-        self.footer = info.get("footer")
-        self.is_blocks = "blocks" in info["content"] or "slides" in info["content"]
-        self.is_html = "body" in info["content"]
-        self.image = self._get_image(info)
-        self.blocks = self._get_blocks_or_none(info)
-        self.html = self._get_html_or_none(info)
-        self.datetime = {
-            "modification": _datetime.fromtimestamp(info["modified_at"]),
-            "publication": _datetime.fromtimestamp(info["published_at"]),
-        }
-
-    def _get_image(self, info):
-        if info.get("image"):
-            return {
-                "url": _BASEURL + info["image"].get("large_url")
-                or info["image"].get("small_url"),
-                "caption": info["image"]["caption"],
-                "credit": info["image"]["credit"],
-            }
-        else:
-            return None
-
-    def _get_blocks_or_none(self, info):
-        if self.is_blocks:
-            return info["content"].get("blocks") or info["content"].get("slides")
-        else:
-            return None
-
-    def _get_html_or_none(self, info):
-        if self.is_html:
-            return info["content"]["body"]
-        else:
-            return None
-
-    def __repr__(self):
-        return f"<{self.tag.title()}: '{self.title}'>"
-
-    def __iter__(self):
-        iters = dict((x, y) for x, y in self.__dict__.items() if not x.startswith("_"))
-        for x, y in iters.items():
-            yield x, y
-
-    def as_dict(self):
-        return self._info
+    return _GET(_LATEST_PUSH)["notification"]
