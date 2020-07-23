@@ -42,12 +42,13 @@ RU_TAGS = [
     "партнерский материал",
 ]
 
+REQUEST_TYPES = ["term", "chrono"]
 
 _BASEURL = "https://meduza.io"
 _V3 = "api/v3"
-_W4 = "api/w4"
+_W5 = "api/w5"
 _MISC = "api/misc"
-_SEARCH_API = f"{_BASEURL}/{_W4}/search?"
+_SEARCH_API = f"{_BASEURL}/{_W5}/search?"
 _SOCIAL_API = f"{_BASEURL}/{_MISC}/social?"
 _STOCK_API = f"{_BASEURL}/{_MISC}/stock/all"
 _LATEST_PUSH = f"{_BASEURL}/{_V3}/push/chrome/latest"
@@ -95,19 +96,20 @@ def get(url: str) -> dict:
     `url` - the url of a page."""
     if not url.startswith(_BASEURL):
         url = urljoin(_BASEURL, url)
-    if _W4 not in url:
-        url = url.replace(_BASEURL, f"{_BASEURL}/{_W4}")
+    if _W5 not in url:
+        url = url.replace(_BASEURL, f"{_BASEURL}/{_W5}")
     return _GET(url)["root"]
 
 
-def section(section: str, *, n=24, lang="ru", page=0):
-    """Gets articles from the `section`.
+def api_request(request_type: str, request: str, *, n=24, lang="ru", page=0):
+    """Gets articles from the `api_request`.
 
-    `section` - Section name (see `meduza.EN_SECTIONS` and q
-    `meduza.RU_SECTIONS` constants);
+    `request_type` - Type of request (see
+    `meduza.REQUEST_TYPES` constant);
     `n` - How many articles to return;
-    `lang` - Russian or English version of meduza.io (see 
-    `meduza.LANGUAGES`)."""
+    `lang` - Russian or English version of meduza.io (see
+    `meduza.LANGUAGES`).;
+    `page` - Page number"""
 
     def _article_urls(url):
         documents = _GET(url)["documents"]
@@ -115,10 +117,35 @@ def section(section: str, *, n=24, lang="ru", page=0):
             if url == "nil":
                 url = documents["nil"]["root"]["url"]
             yield url
-
-    payload = {"chrono": section, "locale": lang, "page": page, "per_page": n}
+    payload = {request_type: request, "locale": lang, "page": page, "per_page": n}
     for url in _article_urls(_SEARCH_API + urlencode(payload)):
         yield get(url)
+
+
+def section(section: str, *, n=24, lang="ru", page=0):
+    """Gets articles from the `section`.
+
+    `section` - Section name (see `meduza.EN_SECTIONS` and
+    `meduza.RU_SECTIONS` constants);
+    `n` - How many articles to return;
+    `lang` - Russian or English version of meduza.io (see 
+    `meduza.LANGUAGES`).;
+    `page` - Page number"""
+
+    return api_request("chrono", section, n=n, lang=lang, page=page)
+
+
+def search(search_term: str, *, n=24, lang="ru", page=0):
+    """Gets articles from the `search_term`.
+
+    `search_term` - Term to be searched. 
+    Either in Cyrillic or English;
+    `n` - How many articles to return;
+    `lang` - Russian or English version of meduza.io (see
+    `meduza.LANGUAGES`).;
+    `page` - Page number"""
+
+    return api_request("term", search_term, n=n, lang=lang, page=page)
 
 
 def _choose_section_if_tag(tag, *, lang):
