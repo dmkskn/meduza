@@ -12,7 +12,7 @@ class TestPublicAPI(unittest.TestCase):
 
     def test_get(self):
         url_1 = (
-            "https://meduza.io/api/w4/feature/2018/07/03/"
+            "https://meduza.io/api/w5/feature/2018/07/03/"
             "astronomam-udalos-zafiksirovat-rozhdenie-novoy"
             "-planety-temperatura-na-ney-okolo-tysyachi-"
             "gradusov-po-tselsiyu"
