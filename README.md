@@ -47,6 +47,27 @@ Get the latest articles on this section:
  - 'Новая иллюзия: круги, раскрашенные в четыре разных цвета (на самом деле нет)'
 ```
 
+Search articles by key words:
+
+```python
+# English version:
+
+>>> for article in meduza.search('Indigenous', n=3, lang='en'):
+...     print(f" - '{article['title']}'")
+ - 'Indigenous scholar commits self-immolation in Ural city to protest language death'
+ - '‘This is the land of our ancestors’'
+ - 'Trial by fire'
+
+
+# Russian version:
+
+>>> for article in meduza.search('языка коренного', n=3, lang='ru'):
+...     print(f" - '{article['title']}'")
+ - 'Острова Кука собрались сменить название'
+ - 'Последний аргумент в длинном споре'
+ - 'При пожаре в Национальном музее Бразилии погиб архив языков коренных народов. Некоторые из них больше никто не знает'
+ ```
+ 
 You can find available tags and sections in constants:
 
 ```python
@@ -62,3 +83,4 @@ You can find available tags and sections in constants:
 >>> meduza.RU_TAGS
 ('новости', 'истории', 'разбор', 'шапито', 'игры', 'подкасты', 'партнерский материал')
 ```
+ 

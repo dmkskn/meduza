@@ -61,3 +61,9 @@ class TestPublicAPI(unittest.TestCase):
             meduza.section("news", 24)
         with self.assertRaises(TypeError):
             meduza.tag("новости", 24)
+
+    def test_search(self):
+        sobaka = meduza.search("собака", n=24, lang="ru")
+        self.assertTrue(isgenerator(sobaka))
+        sobaka_list = list(sobaka)
+        self.assertEqual(len(sobaka_list), 24)

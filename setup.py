@@ -14,7 +14,7 @@ def get_long_description() -> str:
 
 setup(
     name='meduza',    
-    version='18.12.1',
+    version='20.7.1',
     license='MIT',
     author='Dima Koskin',
     author_email='dmksknn@gmail.com',
