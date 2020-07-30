@@ -2,11 +2,8 @@
 
 import gzip
 import json
-from datetime import date, datetime
-from itertools import islice
 from urllib.parse import urlencode, urljoin
 from urllib.request import urlopen
-from unicodedata import normalize
 
 
 __all__ = [
@@ -117,6 +114,7 @@ def api_request(request_type: str, request: str, *, n=24, lang="ru", page=0):
             if url == "nil":
                 url = documents["nil"]["root"]["url"]
             yield url
+
     payload = {request_type: request, "locale": lang, "page": page, "per_page": n}
     for url in _article_urls(_SEARCH_API + urlencode(payload)):
         yield get(url)
@@ -128,7 +126,7 @@ def section(section: str, *, n=24, lang="ru", page=0):
     `section` - Section name (see `meduza.EN_SECTIONS` and
     `meduza.RU_SECTIONS` constants);
     `n` - How many articles to return;
-    `lang` - Russian or English version of meduza.io (see 
+    `lang` - Russian or English version of meduza.io (see
     `meduza.LANGUAGES`).;
     `page` - Page number"""
 
@@ -138,7 +136,7 @@ def section(section: str, *, n=24, lang="ru", page=0):
 def search(search_term: str, *, n=24, lang="ru", page=0):
     """Gets articles from the `search_term`.
 
-    `search_term` - Term to be searched. 
+    `search_term` - Term to be searched.
     Either in Cyrillic or English;
     `n` - How many articles to return;
     `lang` - Russian or English version of meduza.io (see
@@ -158,7 +156,7 @@ def tag(tag, *, n=24, lang="ru"):
     `tag` - An article tag. Same as in `article['tag']['name']` (see
     `meduza.EN_TAG`S and `meduza.RU_TAGS` constants);
     `n`  -- How many articles to return;
-    `lang` -- Russian or English version of meduza.io (see 
+    `lang` -- Russian or English version of meduza.io (see
     `meduza.LANGUAGES`)."""
     section_name = _choose_section_if_tag(tag, lang=lang)
     page = 0
@@ -172,7 +170,7 @@ def tag(tag, *, n=24, lang="ru"):
 
 
 def reactions_for(*urls) -> dict:
-    """Gets number of reactions in social networks (and number of 
+    """Gets number of reactions in social networks (and number of
     comments on meduza.io) for urls."""
     url = _SOCIAL_API + urlencode({"links": json.dumps([*urls])})
     return _GET(url)
