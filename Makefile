@@ -1,11 +1,12 @@
+install:
+	pipenv install --dev
+	pipenv run pre-commit install
+
 build:
 	pipenv run python setup.py sdist bdist_wheel
 
 publish:
 	pipenv run twine upload dist/*
-
-pre-commit:
-	pipenv run pre-commit install
 
 test:
 	pipenv run pytest --exitfirst tests/
