@@ -1,12 +1,18 @@
 language: python
 python:
-  - "3.6"
-script: python -m unittest discover -s tests/
+    - "3.6"
+    - "3.7"
+    - "3.8"
+install:
+    - pip install pipenv
+    - pipenv install --dev
+script:
+    - make ci
 deploy:
-  skip_cleanup: true
-  provider: pypi
-  username: __token__
-  on:
-    tags: true
-  password:
-    secure: lOaHQvn4nx+gF2w0JwA4FMalCgpy0fM7xBUx050FmZ7AurkffXmUMzzv3+5uzI+MzMNUI2Qb8gd+Gl6aS9m8VoVaEj+xgdQ80GbF+f85UIwFnfaQkcNPDI4bmvye1wvB03Y0F5nuA7J8gXYxWi8RJHYmIKShpMC5eIdJo2zrPrAJw0z3Y45ibf6JzVSFPmxy5NDShqz8cFPDvXYn6BMdAdhgTr+hCL8qHZ5hZqGfryFjHtjYjPwLxMeK5wbdKKM/rnZ3cmvcTvOUxHNTP8YYDC5ceDGcWsEkImfrIIgX+8TiuEYjthOovpBLY+qHeBpRsppECSuss/4D7a6UvDnD/EZuFFDu0Lv3qgxTvnkQ339FAIubQyI+iYslLnuCcfuIpcRMuSIayjJwcqILvEzVrqk8kRptvTjiEvZCYjznodguDpZLO8B7Z3RRXrCwMv0p//paxMpdjjasaOksxx9nfRIaeLM4RC++8I6SzFYZE3bd798OuxrR356K4OJlqsZyKsmB+nu924fDjA8vPiTC37xbEzSd21HYxtcjbMI38Y9wCYZNdAlb+Biz/v2JAISR0e4YS11Fq8dQEFkLDbNwfoXuu5QiucdxGNw8FTg3h4aGRXScHFfd20QSXQTQtD4SKUPGBa4ZtWXnHXw7SJXQ9ANvmH1VOwU1d7qpjq+dCWA=
+    skip_cleanup: true
+    provider: pypi
+    username: __token__
+    on:
+        tags: true
+    password:
+        secure: lOaHQvn4nx+gF2w0JwA4FMalCgpy0fM7xBUx050FmZ7AurkffXmUMzzv3+5uzI+MzMNUI2Qb8gd+Gl6aS9m8VoVaEj+xgdQ80GbF+f85UIwFnfaQkcNPDI4bmvye1wvB03Y0F5nuA7J8gXYxWi8RJHYmIKShpMC5eIdJo2zrPrAJw0z3Y45ibf6JzVSFPmxy5NDShqz8cFPDvXYn6BMdAdhgTr+hCL8qHZ5hZqGfryFjHtjYjPwLxMeK5wbdKKM/rnZ3cmvcTvOUxHNTP8YYDC5ceDGcWsEkImfrIIgX+8TiuEYjthOovpBLY+qHeBpRsppECSuss/4D7a6UvDnD/EZuFFDu0Lv3qgxTvnkQ339FAIubQyI+iYslLnuCcfuIpcRMuSIayjJwcqILvEzVrqk8kRptvTjiEvZCYjznodguDpZLO8B7Z3RRXrCwMv0p//paxMpdjjasaOksxx9nfRIaeLM4RC++8I6SzFYZE3bd798OuxrR356K4OJlqsZyKsmB+nu924fDjA8vPiTC37xbEzSd21HYxtcjbMI38Y9wCYZNdAlb+Biz/v2JAISR0e4YS11Fq8dQEFkLDbNwfoXuu5QiucdxGNw8FTg3h4aGRXScHFfd20QSXQTQtD4SKUPGBa4ZtWXnHXw7SJXQ9ANvmH1VOwU1d7qpjq+dCWA=
