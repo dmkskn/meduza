@@ -6,8 +6,7 @@ verify_ssl = true
 [dev-packages]
 black = "*"
 pre-commit = "*"
-
-[packages]
+pytest = "*"
 
 [requires]
 python_version = "3.6"

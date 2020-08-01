@@ -8,7 +8,7 @@ pre-commit:
 	pipenv run pre-commit install
 
 test:
-	pipenv run python -m unittest discover -s tests/
+	pipenv run pytest --exitfirst tests/
 
 format:
 	pipenv run black meduza.py setup.py tests
@@ -17,6 +17,7 @@ clean:
 	rm -fr build/
 	rm -fr dist/
 	rm -fr .eggs/
+	rm -fr .pytest_cache/
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -f {} +
 	find . -name '*.pyc' -exec rm -f {} +
@@ -26,4 +27,4 @@ clean:
 
 ci:
 	pipenv run black --check meduza.py setup.py tests/
-	pipenv run python -m unittest discover -s tests/
+	pipenv run pytest --exitfirst tests/
