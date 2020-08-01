@@ -11,7 +11,7 @@ test:
 	pipenv run pytest --exitfirst tests/
 
 format:
-	pipenv run black meduza.py setup.py tests
+	pipenv run black meduza setup.py tests
 
 clean:
 	rm -fr build/
@@ -26,5 +26,5 @@ clean:
 	find . -name '__pycache__' -exec rm -fr {} +
 
 ci:
-	pipenv run black --check meduza.py setup.py tests/
+	pipenv run black --check meduza setup.py tests
 	pipenv run pytest --exitfirst tests/
