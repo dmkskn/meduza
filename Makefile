@@ -10,6 +10,9 @@ pre-commit:
 test:
 	pipenv run pytest --exitfirst tests/
 
+mypy:
+	pipenv run mypy meduza
+
 format:
 	pipenv run black meduza setup.py tests
 
@@ -18,6 +21,7 @@ clean:
 	rm -fr dist/
 	rm -fr .eggs/
 	rm -fr .pytest_cache/
+	rm -fr .mypy_cache/
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -f {} +
 	find . -name '*.pyc' -exec rm -f {} +
@@ -27,4 +31,5 @@ clean:
 
 ci:
 	pipenv run black --check meduza setup.py tests
+	pipenv run mypy meduza
 	pipenv run pytest --exitfirst tests/

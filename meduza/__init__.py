@@ -2,9 +2,9 @@
 
 import gzip
 import json
+from typing import Any, Iterator, Optional
 from urllib.parse import urlencode, urljoin
 from urllib.request import urlopen
-
 
 __all__ = [
     "LANGUAGES",
@@ -67,7 +67,7 @@ _eng_section_from = {"news": "news", "games": "news", "like it or not": "news"}
 
 
 # open URL and return JSON response (as dict)
-def _GET(url):
+def _GET(url: str) -> Any:
     # open url
     response = urlopen(url)
     headers = dict(response.headers)
@@ -81,13 +81,13 @@ def _GET(url):
     return json.loads(data)
 
 
-def stocks(key=None) -> dict:
+def stocks(key: Optional[str] = None) -> Any:
     """Returns stocks."""
     response = _GET(_STOCK_API)
     return response if key is None else response[key]
 
 
-def get(url: str) -> dict:
+def get(url: str) -> Any:
     """Gets the article for the url.
 
     `url` - the url of a page."""
@@ -98,7 +98,7 @@ def get(url: str) -> dict:
     return _GET(url)["root"]
 
 
-def api_request(request_type: str, request: str, *, n=24, lang="ru", page=0):
+def api_request(request_type: str, request: str, *, n: int = 24, lang: str = "ru", page: int = 0) -> Iterator[Any]:
     """Gets articles from the `api_request`.
 
     `request_type` - Type of request (see
@@ -108,7 +108,7 @@ def api_request(request_type: str, request: str, *, n=24, lang="ru", page=0):
     `meduza.LANGUAGES`).;
     `page` - Page number"""
 
-    def _article_urls(url):
+    def _article_urls(url: str) -> Iterator[str]:
         documents = _GET(url)["documents"]
         for url in documents:
             if url == "nil":
@@ -120,7 +120,7 @@ def api_request(request_type: str, request: str, *, n=24, lang="ru", page=0):
         yield get(url)
 
 
-def section(section: str, *, n=24, lang="ru", page=0):
+def section(section: str, *, n: int = 24, lang: str = "ru", page: int = 0) -> Iterator[Any]:
     """Gets articles from the `section`.
 
     `section` - Section name (see `meduza.EN_SECTIONS` and
@@ -133,7 +133,7 @@ def section(section: str, *, n=24, lang="ru", page=0):
     return api_request("chrono", section, n=n, lang=lang, page=page)
 
 
-def search(search_term: str, *, n=24, lang="ru", page=0):
+def search(search_term: str, *, n: int = 24, lang: str = "ru", page: int = 0) -> Iterator[Any]:
     """Gets articles from the `search_term`.
 
     `search_term` - Term to be searched.
@@ -146,11 +146,11 @@ def search(search_term: str, *, n=24, lang="ru", page=0):
     return api_request("term", search_term, n=n, lang=lang, page=page)
 
 
-def _choose_section_if_tag(tag, *, lang):
+def _choose_section_if_tag(tag: str, *, lang: str) -> str:
     return _rus_section_from[tag] if lang == "ru" else _eng_section_from[tag]
 
 
-def tag(tag, *, n=24, lang="ru"):
+def tag(tag: str, *, n: int = 24, lang: str = "ru") -> Iterator[Any]:
     """Gets articles with the `tag`.
 
     `tag` - An article tag. Same as in `article['tag']['name']` (see
@@ -169,13 +169,13 @@ def tag(tag, *, n=24, lang="ru"):
         page += 1
 
 
-def reactions_for(*urls) -> dict:
+def reactions_for(*urls: str) -> Any:
     """Gets number of reactions in social networks (and number of
     comments on meduza.io) for urls."""
     url = _SOCIAL_API + urlencode({"links": json.dumps([*urls])})
     return _GET(url)
 
 
-def latest_push() -> dict:
+def latest_push() -> Any:
     """Gets the latest push."""
     return _GET(_LATEST_PUSH)["notification"]
